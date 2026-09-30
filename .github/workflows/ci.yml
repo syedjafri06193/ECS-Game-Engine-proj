@@ -1,0 +1,49 @@
+name: ci
+on: [push, pull_request]
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: gcc,   os: ubuntu-24.04, cc: gcc,   cxx: g++,     sanitize: "" }
+          - { name: clang, os: ubuntu-24.04, cc: clang, cxx: clang++, sanitize: "" }
+          - { name: asan,  os: ubuntu-24.04, cc: gcc,   cxx: g++,     sanitize: address }
+          - { name: tsan,  os: ubuntu-24.04, cc: gcc,   cxx: g++,     sanitize: thread }
+          - { name: macos, os: macos-14,     cc: clang, cxx: clang++, sanitize: "" }
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+      - if: runner.os == 'macOS'
+        run: brew install ninja
+      - name: TSan needs lower mmap entropy on recent kernels
+        if: matrix.sanitize == 'thread'
+        run: sudo sysctl vm.mmap_rnd_bits=28
+      - name: Configure
+        env: { CC: "${{ matrix.cc }}", CXX: "${{ matrix.cxx }}" }
+        run: >
+          cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=${{ matrix.sanitize == '' && 'Release' || 'RelWithDebInfo' }}
+          -DENGINE_SANITIZE=${{ matrix.sanitize }}
+          -DENGINE_BUILD_BENCH=${{ matrix.sanitize == '' && 'ON' || 'OFF' }}
+      - run: cmake --build build
+      - run: ctest --test-dir build --output-on-failure
+      - if: matrix.sanitize == ''
+        run: ./build/apps/bench/engine_bench 200000
+
+  vulkan-build:
+    name: vulkan (compile only)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: >
+          sudo apt-get update && sudo apt-get install -y ninja-build glslang-tools
+          libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
+      - run: >
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          -DENGINE_BUILD_VULKAN=ON -DGLFW_BUILD_WAYLAND=OFF
+      - run: cmake --build build

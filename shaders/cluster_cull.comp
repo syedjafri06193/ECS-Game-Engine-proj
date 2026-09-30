@@ -1,0 +1,59 @@
+#version 460
+// Light culling (design doc §6.4): one invocation per froxel. Builds the
+// froxel's view-space AABB exactly like engine::cluster::ClusterBounds and
+// tests every light sphere against it. Froxels need no depth, which is why
+// clustered shading also works for transparent geometry.
+#extension GL_GOOGLE_include_directive : require
+#include "common.glsl"
+
+layout(local_size_x = 64) in;
+
+float SliceNear(uint k)
+{
+    FrameBuf f = pc.frame;
+    return f.grid_params.x * pow(f.grid_params.y / f.grid_params.x, float(k) / float(f.grid.z));
+}
+
+void main()
+{
+    FrameBuf f = pc.frame;
+    uint index = gl_GlobalInvocationID.x;
+    uint total = f.grid.x * f.grid.y * f.grid.z;
+    if (index >= total) return;
+
+    uint cx = index % f.grid.x;
+    uint cy = (index / f.grid.x) % f.grid.y;
+    uint cz = index / (f.grid.x * f.grid.y);
+
+    float tan_y = f.grid_params.z, tan_x = tan_y * f.grid_params.w;
+    float nx0 = float(cx) / float(f.grid.x) * 2.0 - 1.0, nx1 = float(cx + 1u) / float(f.grid.x) * 2.0 - 1.0;
+    float ny0 = 1.0 - float(cy) / float(f.grid.y) * 2.0, ny1 = 1.0 - float(cy + 1u) / float(f.grid.y) * 2.0;
+    float dn = SliceNear(cz);
+    float df = (cz + 1u >= f.grid.z) ? f.grid_params.y : SliceNear(cz + 1u);
+
+    vec3 bmin = vec3(1e30, 1e30, -df), bmax = vec3(-1e30, -1e30, -dn);
+    for (int di = 0; di < 2; ++di) {
+        float d = di == 0 ? dn : df;
+        for (int xi = 0; xi < 2; ++xi)
+            for (int yi = 0; yi < 2; ++yi) {
+                float x = (xi == 0 ? nx0 : nx1) * d * tan_x;
+                float y = (yi == 0 ? ny0 : ny1) * d * tan_y;
+                bmin.xy = min(bmin.xy, vec2(x, y));
+                bmax.xy = max(bmax.xy, vec2(x, y));
+            }
+    }
+
+    uint base = index * (MAX_LIGHTS_PER_CLUSTER + 1u);
+    uint count = 0u;
+    uint light_count = f.grid.w;
+    for (uint l = 0u; l < light_count && count < MAX_LIGHTS_PER_CLUSTER; ++l) {
+        Light light = pc.lights.l[l];
+        vec3 c = (f.view * vec4(light.position, 1.0)).xyz;
+        vec3 e = max(bmin - c, vec3(0.0)) + max(c - bmax, vec3(0.0));
+        if (dot(e, e) <= light.radius * light.radius) {
+            pc.clusters.v[base + 1u + count] = l;
+            count++;
+        }
+    }
+    pc.clusters.v[base] = count;
+}
