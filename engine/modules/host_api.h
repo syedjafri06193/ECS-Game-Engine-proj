@@ -11,7 +11,7 @@
  *   - it creates no GPU resources
  *
  * tools/module_verify.py rejects modules that break these rules at build
- * time; docs/module-contract.md explains each one.
+ * time; 1—Documentation/module-contract.md explains each one.
  */
 #include <stdint.h>
 

@@ -3,7 +3,7 @@
 Custom entity-component-system engine with a job-based scheduler, hot-reloadable
 gameplay modules, and a Vulkan forward+ renderer.
 
-Built to the design in [`Documentation/README.md`](Documentation/README.md) — or
+Built to the design in [`1—Documentation/design-guide.md`](1—Documentation/design-guide.md) — or
 more precisely to its revised statement: a C++20 ECS with **hybrid storage**, a
 **work-stealing scheduler** with statically declared system access and deferred
 structural changes, a **Vulkan 1.3** renderer with bindless resources and a
@@ -25,7 +25,7 @@ Lua scripts plus native modules that own no state and no types.
 
 | Milestone | State |
 |---|---|
-| M0 scope decision | [`docs/scope.md`](docs/scope.md) |
+| M0 scope decision | [`1—Documentation/scope.md`](1—Documentation/scope.md) |
 | M1 core + ECS | Done, tested, benchmarked at 1 M entities |
 | M2 job scheduler | Done, tested under ThreadSanitizer |
 | M3 Vulkan foundation | Written and **compiles**; needs a GPU to run (see below) |
@@ -90,7 +90,7 @@ previous version running and shows the error in the overlay.
 run `cmake --build build-vk --target gameplay`. The demo notices the new
 build, quiesces the scheduler, swaps the library and re-registers its
 systems; the world is untouched. A broken build rolls back to the running one.
-Modules contain **systems only** — see [`docs/module-contract.md`](docs/module-contract.md);
+Modules contain **systems only** — see [`1—Documentation/module-contract.md`](1—Documentation/module-contract.md);
 the build rejects modules that hold state, export extra symbols or use vtables.
 
 **Component layout changes** need a restart; world state survives through

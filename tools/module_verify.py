@@ -107,7 +107,7 @@ def main():
         print("module_verify: cannot inspect %s: %s" % (path, e), file=sys.stderr)
         return 2
     if problems:
-        print("module_verify: %s violates the module contract (docs/module-contract.md):" % path)
+        print("module_verify: %s violates the module contract (1—Documentation/module-contract.md):" % path)
         for p in problems:
             print("  - " + p)
         return 1
