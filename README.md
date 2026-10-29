@@ -178,3 +178,44 @@ docs/             scope, module contract, render graph
    culling (M6).
 3. Shadows and a glTF loader (M5, M9).
 4. A debug allocator that asserts on allocations from module code (§3.3).
+
+<!-- project-metrics:start -->
+## Project Metrics
+
+[![Stars](https://img.shields.io/github/stars/syedjafri06193/ECS-Game-Engine-proj?style=flat-square)](https://github.com/syedjafri06193/ECS-Game-Engine-proj/stargazers) [![Forks](https://img.shields.io/github/forks/syedjafri06193/ECS-Game-Engine-proj?style=flat-square)](https://github.com/syedjafri06193/ECS-Game-Engine-proj/forks) [![Open issues](https://img.shields.io/github/issues/syedjafri06193/ECS-Game-Engine-proj?style=flat-square)](https://github.com/syedjafri06193/ECS-Game-Engine-proj/issues) [![Last commit](https://img.shields.io/github/last-commit/syedjafri06193/ECS-Game-Engine-proj/improvements?style=flat-square)](https://github.com/syedjafri06193/ECS-Game-Engine-proj/commits/improvements) [![Commits](https://img.shields.io/github/commit-activity/t/syedjafri06193/ECS-Game-Engine-proj?style=flat-square)](https://github.com/syedjafri06193/ECS-Game-Engine-proj/commits/improvements) [![Top language](https://img.shields.io/github/languages/top/syedjafri06193/ECS-Game-Engine-proj?style=flat-square)](https://github.com/syedjafri06193/ECS-Game-Engine-proj) [![Repo size](https://img.shields.io/github/repo-size/syedjafri06193/ECS-Game-Engine-proj?style=flat-square)](https://github.com/syedjafri06193/ECS-Game-Engine-proj)
+
+### Code
+
+| Metric | Value |
+|---|---|
+| Lines of code | 6,003 |
+| Source files | 65 |
+| Tracked files | 82 |
+| Documentation | 6 Markdown files (11,036 words), 1 PDF |
+| Commits | 7 |
+| Contributors | 1 |
+| Active | 2026-09-11 → 2026-10-28 |
+
+| Language | Lines | Share |
+|---|---:|---:|
+| C++ | 4,106 | 68.4% |
+| C | 1,640 | 27.3% |
+| GLSL | 81 | 1.3% |
+| CMake | 80 | 1.3% |
+| Python | 77 | 1.3% |
+| Lua | 19 | 0.3% |
+
+### Performance
+
+| Metric | Result |
+|---|---|
+| Create entity (1M entities, 2-core VM) | 166 ns/entity |
+| Iterate, single thread | **3.3 ns/entity** (306 M/s) |
+| Iterate, parallel pipeline | 1.5 ns/entity per frame |
+| Tag toggle: archetype vs sparse set | 121 ns → **26 ns** |
+| Empty job round trip | 320 ns |
+
+<sub>Measured figures recorded in [`README.md`](README.md).</sub>
+
+<sub>Code stats as of 2026-10-28, counted with pygount (comments and blank lines excluded). Badges update live.</sub>
+<!-- project-metrics:end -->
